@@ -1,6 +1,7 @@
 """
 Admin Statistics — Статистика в GTON
 """
+from __future__ import annotations
 from decimal import Decimal
 from datetime import datetime, timedelta
 from sqlalchemy import select, func, and_
