@@ -35,6 +35,19 @@ class AstrologyRenderer:
             autoescape=True
         )
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    def _get_bot_link(self) -> Optional[str]:
+        bot_link = os.getenv("TELEGRAM_BOT_LINK") or os.getenv("BOT_LINK")
+        if bot_link:
+            return bot_link
+
+        username = os.getenv("TELEGRAM_BOT_USERNAME") or os.getenv("BOT_USERNAME")
+        if username:
+            username = username.lstrip("@").strip()
+            if username:
+                return f"https://t.me/{username}"
+
+        return None
     
     def _markdown_to_html(self, text: str) -> str:
         """Конвертирует markdown/текст в HTML"""
@@ -108,7 +121,8 @@ class AstrologyRenderer:
                 moon_sign=moon_sign,
                 asc_sign=asc_sign,
                 content=html_content,
-                date=datetime.now().strftime("%d.%m.%Y")
+                date=datetime.now().strftime("%d.%m.%Y"),
+                bot_link=self._get_bot_link(),
             )
             
             # Формируем понятное имя файла
@@ -139,6 +153,10 @@ class AstrologyRenderer:
             
             html_content = self._markdown_to_html(content)
             date_str = datetime.now().strftime("%d.%m.%Y")
+            bot_link = self._get_bot_link()
+            bot_link_html = ""
+            if bot_link:
+                bot_link_html = f'<div style="margin-top: 10px;"><a href="{bot_link}" target="_blank" rel="noopener noreferrer" style="color:#87ceeb;">Открыть бота в Telegram</a></div>'
             
             title = f"Гороскоп {person_name} на {date_str}".strip() if person_name else f"Гороскоп на {date_str}"
             
@@ -148,7 +166,8 @@ class AstrologyRenderer:
                 sun_emoji=sun_emoji,
                 date_formatted=datetime.now().strftime("%d %B %Y"),
                 content=html_content,
-                date=date_str
+                date=date_str,
+                bot_link=self._get_bot_link(),
             )
             
             # Формируем понятное имя файла
@@ -189,7 +208,8 @@ class AstrologyRenderer:
                 person2_name=person2_name,
                 person2_emoji=person2_emoji,
                 content=html_content,
-                date=datetime.now().strftime("%d.%m.%Y")
+                date=datetime.now().strftime("%d.%m.%Y"),
+                bot_link=self._get_bot_link(),
             )
             
             # Формируем понятное имя файла
@@ -230,7 +250,8 @@ class AstrologyRenderer:
                 sun_sign=sun_sign,
                 moon_sign=moon_sign,
                 content=html_content,
-                date=datetime.now().strftime("%d.%m.%Y")
+                date=datetime.now().strftime("%d.%m.%Y"),
+                bot_link=self._get_bot_link(),
             )
             
             # Формируем понятное имя файла
@@ -272,7 +293,8 @@ class AstrologyRenderer:
                 question_text=question_text,
                 persons=persons,
                 content=html_content,
-                date=datetime.now().strftime("%d.%m.%Y")
+                date=datetime.now().strftime("%d.%m.%Y"),
+                bot_link=self._get_bot_link(),
             )
             
             # Формируем понятное имя файла
@@ -325,6 +347,7 @@ class AstrologyRenderer:
     <h1>{title}</h1>
     <div class=\"date\">{date_str}</div>
     <div class=\"content\">{html_content}</div>
+    {bot_link_html}
   </div>
 </body>
 </html>"""

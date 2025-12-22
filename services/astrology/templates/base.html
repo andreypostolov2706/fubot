@@ -211,6 +211,9 @@
         <div class="footer">
             <div class="logo">🔮 Астрология</div>
             <div>{{ date }}</div>
+            {% if bot_link %}
+            <div><a href="{{ bot_link }}" target="_blank" rel="noopener noreferrer">Открыть бота в Telegram</a></div>
+            {% endif %}
         </div>
     </div>
 </body>
