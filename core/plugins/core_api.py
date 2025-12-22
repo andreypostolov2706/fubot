@@ -1,6 +1,7 @@
 """
 Core API - Interface for services to interact with core
 """
+from __future__ import annotations
 from typing import Optional, Any
 from datetime import datetime
 from decimal import Decimal

@@ -5,6 +5,7 @@ Fetches and caches exchange rates from external APIs.
 - Fiat rates: exchangerate-api.com (updated daily)
 - Crypto rates: CoinGecko (updated every 10 minutes)
 """
+from __future__ import annotations
 from datetime import datetime, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, Dict

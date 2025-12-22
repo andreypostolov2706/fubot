@@ -4,6 +4,7 @@ Currency Converter
 Converts any currency to GTON and vice versa.
 Chain: ANY → USD → TON → GTON
 """
+from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, Dict
