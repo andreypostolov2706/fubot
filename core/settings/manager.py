@@ -7,6 +7,7 @@ Settings Manager — Единый интерфейс для работы с на
 - Автоматическая инвалидация кэша при изменении
 - Регистрация всех используемых настроек
 """
+from __future__ import annotations
 from decimal import Decimal
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, List

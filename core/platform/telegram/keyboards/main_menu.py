@@ -1,6 +1,7 @@
 """
 Main Menu Keyboard
 """
+from __future__ import annotations
 from core.locales import t
 from core.config import config
 from core.plugins.registry import service_registry

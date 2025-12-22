@@ -3,6 +3,7 @@ Payment Service
 
 Main service for handling payments and GTON operations.
 """
+from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal

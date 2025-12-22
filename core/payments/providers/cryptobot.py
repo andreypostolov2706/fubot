@@ -4,6 +4,7 @@ CryptoBot Payment Provider
 Integration with @CryptoBot for cryptocurrency payments.
 API Docs: https://help.crypt.bot/crypto-pay-api
 """
+from __future__ import annotations
 import hashlib
 import hmac
 from dataclasses import dataclass

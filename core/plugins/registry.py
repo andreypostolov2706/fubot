@@ -1,6 +1,7 @@
 """
 Service Registry - Manages installed services
 """
+from __future__ import annotations
 from typing import Dict, Optional, List
 from pathlib import Path
 import importlib

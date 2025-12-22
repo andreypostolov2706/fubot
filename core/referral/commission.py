@@ -9,6 +9,7 @@ Referral Commission Service
 3. Если реферер — партнёр, начисляем ему повышенную комиссию
 4. Обновляем статистику в Referral и Partner
 """
+from __future__ import annotations
 from decimal import Decimal
 from datetime import datetime
 from typing import Optional, List

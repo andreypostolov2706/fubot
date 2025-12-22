@@ -1,6 +1,7 @@
 """
 Localization System
 """
+from __future__ import annotations
 from typing import Dict, Any, Optional
 from importlib import import_module
 

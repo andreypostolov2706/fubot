@@ -3,6 +3,7 @@ Payment Models
 
 Payment and PaymentProvider models for handling payments.
 """
+from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, List
