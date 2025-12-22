@@ -48,71 +48,70 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
     
     # Base menu items
     menu_items: list[MenuItem] = [
-        # 1. Натальная карта
+        # 1. Натальная карта (одна колонка)
         MenuItem(
             text="🌟 Натальная карта",
             callback="service:astrology:natal",
-            order=1
+            order=1,
+            full_width=True
         ),
-        # 2. Совместимость
+        # 2. Совместимость 3. Детский (две колонки)
         MenuItem(
             text="💑 Совместимость",
             callback="service:astrology:compat",
             order=2
         ),
-        # 3. Детский
         MenuItem(
             text="👶 Детский",
             callback="service:astrology:child",
             order=3
         ),
-        # 4. Гороскоп на сегодня (Подписка)
+        # 4. Гороскоп на сегодня (Подписка) (одна колонка)
         MenuItem(
             text=f"{daily_icon} Гороскоп на сегодня",
             callback="service:astrology:daily_toggle",
-            order=4
+            order=4,
+            full_width=True
         ),
-        # 5. Все услуги
+        # 5. Все услуги 6. История (две колонки)
         MenuItem(
             text="📋 Все услуги",
             callback="service:astrology:menu",
             order=5
         ),
-        # 6. История
         MenuItem(
-            text="� История",
+            text="📜 История",
             callback="service:astrology:history",
             order=6
         ),
-        # 7. Мои карты
+        # 7. Мои карты 8. Настройки (две колонки)
         MenuItem(
-            text="� Мои карты",
+            text="🗂 Мои карты",
             callback="service:astrology:cards",
             order=7
         ),
-        # 8. Настройки
         MenuItem(
             text="⚙️ Настройки",
             callback="service:astrology:settings",
             order=8
         ),
-        # 9. Пополнить
+        # 9. Пополнить 10. Помощь (две колонки)
         MenuItem(
             text=t(lang, "MAIN_MENU.top_up"), 
             callback="top_up", 
             order=9
         ),
-        # 10. Помощь
         MenuItem(
             text=t(lang, "MAIN_MENU.help"), 
             callback="help", 
             order=10
         ),
-        # 11. Партнёрская программа
+        # 11. Партнёрская программа (одна колонка)
         MenuItem(
             text=t(lang, "MAIN_MENU.partner"), 
             callback="partner", 
-            order=11
+            order=11,
+            full_width=True
         ),
     ]
     
@@ -128,7 +127,7 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
     # Sort by order
     menu_items.sort(key=lambda x: x.order)
     
-    # Build keyboard in 2 columns
+    # Build keyboard with full_width support
     keyboard = []
     row = []
     for item in menu_items:
@@ -136,11 +135,20 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
             btn_text = item.text
             if item.badge:
                 btn_text += f" {item.badge}"
-            row.append({"text": btn_text, "callback_data": item.callback})
+            btn = {"text": btn_text, "callback_data": item.callback}
             
-            if len(row) == 2:
-                keyboard.append(row)
-                row = []
+            if item.full_width:
+                # Сначала добавляем накопленный ряд
+                if row:
+                    keyboard.append(row)
+                    row = []
+                # Добавляем кнопку на всю ширину
+                keyboard.append([btn])
+            else:
+                row.append(btn)
+                if len(row) == 2:
+                    keyboard.append(row)
+                    row = []
     
     # Add remaining button if odd number
     if row:

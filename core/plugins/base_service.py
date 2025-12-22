@@ -30,6 +30,7 @@ class MenuItem:
     row: Optional[int] = None          # Row number (for grouping)
     visible: bool = True               # Show or not
     badge: Optional[str] = None        # "NEW", "3", "⭐"
+    full_width: bool = False           # Full width button (single column)
 
 
 @dataclass
