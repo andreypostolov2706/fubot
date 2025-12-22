@@ -21,6 +21,7 @@ class TelegramBot:
         self.application = (
             Application.builder()
             .token(config.TELEGRAM_BOT_TOKEN)
+            .concurrent_updates(8)
             .build()
         )
         
