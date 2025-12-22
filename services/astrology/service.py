@@ -1293,6 +1293,12 @@ class AstrologyService(BaseService):
             
             chart_data = ChartData.from_dict(profile.chart_data or {})
             interpretation, tokens = await interpreter.interpret_love(chart_data)
+
+            html_path = renderer.render_generic(
+                title=f"Любовный портрет {profile.name}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1300,13 +1306,21 @@ class AstrologyService(BaseService):
                     profile_id=profile.id,
                     reading_type="love",
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"💕 Любовный портрет {profile.name} готов!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "portrait_chart":
@@ -1327,6 +1341,12 @@ class AstrologyService(BaseService):
             
             chart_data = ChartData.from_dict(chart.chart_data or {})
             interpretation, tokens = await interpreter.interpret_love(chart_data)
+
+            html_path = renderer.render_generic(
+                title=f"Любовный портрет {chart.name}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1335,13 +1355,21 @@ class AstrologyService(BaseService):
                     chart_id=chart_id,
                     reading_type="love",
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"💕 Любовный портрет {chart.name} готов!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "add":
@@ -1436,6 +1464,12 @@ class AstrologyService(BaseService):
             
             period_text = f"{period_data['name']} ({period_data['days']} дней)"
             interpretation, tokens = await interpreter.interpret_forecast(chart_data, period_text, ["general"])
+
+            html_path = renderer.render_generic(
+                title=f"Астропрогноз {person_name}: {period_data['name']}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1445,13 +1479,21 @@ class AstrologyService(BaseService):
                     reading_type="forecast",
                     reading_subtype=period,
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"🔮 Астропрогноз для {person_name} готов!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "add":
@@ -1544,6 +1586,12 @@ class AstrologyService(BaseService):
             
             period_text = f"{period_data['name']} ({period_data['days']} дней)"
             interpretation, tokens = await interpreter.interpret_events(chart_data, period_text)
+
+            html_path = renderer.render_generic(
+                title=f"График событий {person_name}: {period_data['name']}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1553,13 +1601,21 @@ class AstrologyService(BaseService):
                     reading_type="events",
                     reading_subtype=period,
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"📅 График событий для {person_name} готов!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "add":
@@ -1669,6 +1725,12 @@ class AstrologyService(BaseService):
             chart_data = ChartData.from_dict(profile.chart_data or {})
             today = datetime.now().strftime("%d.%m.%Y")
             interpretation, tokens = await interpreter.interpret_transits(chart_data, today)
+
+            html_path = renderer.render_generic(
+                title=f"Транзиты сейчас: {profile.name}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1676,13 +1738,21 @@ class AstrologyService(BaseService):
                     profile_id=profile.id,
                     reading_type="transit",
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"✨ Транзиты для {profile.name} готовы!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "generate_chart":
@@ -1703,6 +1773,12 @@ class AstrologyService(BaseService):
             chart_data = ChartData.from_dict(chart.chart_data or {})
             today = datetime.now().strftime("%d.%m.%Y")
             interpretation, tokens = await interpreter.interpret_transits(chart_data, today)
+
+            html_path = renderer.render_generic(
+                title=f"Транзиты сейчас: {chart.name}",
+                content=interpretation,
+                user_id=user_id,
+            )
             
             async with get_db() as session:
                 reading = AstrologyReading(
@@ -1711,13 +1787,21 @@ class AstrologyService(BaseService):
                     chart_id=chart_id,
                     reading_type="transit",
                     interpretation=interpretation,
+                    file_path=html_path,
                     is_free=False,
                     gton_cost=price,
                     tokens_used=tokens,
                 )
                 session.add(reading)
                 await session.commit()
-            
+
+            if html_path:
+                return Response(
+                    text=f"✨ Транзиты для {chart.name} готовы!",
+                    keyboard=kb.back_to_menu_keyboard_list(),
+                    media_path=html_path,
+                    media_type="document",
+                )
             return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
         
         elif action == "add":

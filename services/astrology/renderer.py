@@ -289,5 +289,56 @@ class AstrologyRenderer:
             logger.error(f"Error rendering question answer: {e}")
             return None
 
+    def render_generic(
+        self,
+        title: str,
+        content: str,
+        user_id: int,
+    ) -> Optional[str]:
+        """Рендерит произвольный результат в HTML файл (fallback для услуг без шаблона)."""
+        try:
+            html_content = self._markdown_to_html(content)
+            date_str = datetime.now().strftime("%d.%m.%Y")
+
+            html = f"""<!DOCTYPE html>
+<html lang=\"ru\">
+<head>
+  <meta charset=\"UTF-8\" />
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+  <title>{title}</title>
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 24px; background: #0f1220; color: #ffffff; }}
+    .container {{ max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 24px; }}
+    h1 {{ font-size: 22px; margin: 0 0 6px 0; }}
+    .date {{ font-size: 12px; opacity: 0.7; margin-bottom: 18px; }}
+    .content {{ line-height: 1.7; font-size: 15px; }}
+    .content p {{ margin: 0 0 12px 0; }}
+    .content h2 {{ font-size: 18px; margin: 18px 0 10px 0; }}
+    .content h3 {{ font-size: 16px; margin: 16px 0 8px 0; }}
+    .content ul, .content ol {{ margin: 10px 0 10px 20px; }}
+    .content li {{ margin: 6px 0; }}
+    a {{ color: #87ceeb; }}
+  </style>
+</head>
+<body>
+  <div class=\"container\">
+    <h1>{title}</h1>
+    <div class=\"date\">{date_str}</div>
+    <div class=\"content\">{html_content}</div>
+  </div>
+</body>
+</html>"""
+
+            filename = sanitize_filename(title)
+            output_path = OUTPUT_DIR / f"{filename}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(html)
+
+            logger.info(f"Rendered generic html to {output_path}")
+            return str(output_path)
+        except Exception as e:
+            logger.error(f"Error rendering generic html: {e}")
+            return None
+
 
 renderer = AstrologyRenderer()
