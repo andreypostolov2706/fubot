@@ -46,65 +46,73 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
     daily_enabled = await get_daily_horoscope_status(user_id)
     daily_icon = "✅" if daily_enabled else "⬜"
     
-    # Base menu items (без промокода — он есть в пополнении)
+    # Base menu items
     menu_items: list[MenuItem] = [
-        # Популярные услуги астрологии - быстрый доступ
+        # 1. Натальная карта
         MenuItem(
             text="🌟 Натальная карта",
             callback="service:astrology:natal",
-            order=5
+            order=1
         ),
+        # 2. Совместимость
         MenuItem(
             text="💑 Совместимость",
             callback="service:astrology:compat",
+            order=2
+        ),
+        # 3. Детский
+        MenuItem(
+            text="👶 Детский",
+            callback="service:astrology:child",
+            order=3
+        ),
+        # 4. Гороскоп на сегодня (Подписка)
+        MenuItem(
+            text=f"{daily_icon} Гороскоп на сегодня",
+            callback="service:astrology:daily_toggle",
+            order=4
+        ),
+        # 5. Все услуги
+        MenuItem(
+            text="📋 Все услуги",
+            callback="service:astrology:menu",
+            order=5
+        ),
+        # 6. История
+        MenuItem(
+            text="� История",
+            callback="service:astrology:history",
             order=6
         ),
+        # 7. Мои карты
         MenuItem(
-            text="☀️ Гороскоп на сегодня",
-            callback="service:astrology:daily",
+            text="� Мои карты",
+            callback="service:astrology:cards",
             order=7
         ),
-        MenuItem(
-            text="👶 Детский гороскоп",
-            callback="service:astrology:child",
-            order=8
-        ),
-        MenuItem(
-            text=f"{daily_icon} Гороскоп на день",
-            callback="service:astrology:daily_toggle",
-            order=9
-        ),
-        # Мои карты, История, Настройки
-        MenuItem(
-            text="🗂 Мои карты",
-            callback="service:astrology:cards",
-            order=15
-        ),
-        MenuItem(
-            text="📜 История",
-            callback="service:astrology:history",
-            order=16
-        ),
+        # 8. Настройки
         MenuItem(
             text="⚙️ Настройки",
             callback="service:astrology:settings",
-            order=17
+            order=8
         ),
-        # Основные пункты меню
+        # 9. Пополнить
         MenuItem(
             text=t(lang, "MAIN_MENU.top_up"), 
             callback="top_up", 
-            order=100
+            order=9
         ),
-        MenuItem(
-            text=t(lang, "MAIN_MENU.partner"), 
-            callback="partner", 
-            order=200
-        ),
+        # 10. Помощь
         MenuItem(
             text=t(lang, "MAIN_MENU.help"), 
             callback="help", 
-            order=400
+            order=10
+        ),
+        # 11. Партнёрская программа
+        MenuItem(
+            text=t(lang, "MAIN_MENU.partner"), 
+            callback="partner", 
+            order=11
         ),
     ]
     
