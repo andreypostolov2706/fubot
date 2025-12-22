@@ -3,7 +3,7 @@ Base Service - Abstract class for all services
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING, List, Dict
 from datetime import datetime
 
 if TYPE_CHECKING:
@@ -144,7 +144,7 @@ class BaseService(ABC):
         pass
     
     @property
-    def permissions(self) -> list[str]:
+    def permissions(self) -> List[str]:
         """
         Required permissions.
         
@@ -217,7 +217,7 @@ class BaseService(ABC):
         self, 
         user_id: int, 
         user_data: UserServiceDTO
-    ) -> list[MenuItem]:
+    ) -> List[MenuItem]:
         """
         Menu items for user.
         
@@ -231,7 +231,7 @@ class BaseService(ABC):
         pass
     
     @abstractmethod
-    def get_admin_menu_items(self) -> list[MenuItem]:
+    def get_admin_menu_items(self) -> List[MenuItem]:
         """
         Admin menu items.
         
@@ -240,7 +240,7 @@ class BaseService(ABC):
         """
         pass
     
-    def get_partner_menu_items(self, partner_id: int) -> list[MenuItem]:
+    def get_partner_menu_items(self, partner_id: int) -> List[MenuItem]:
         """
         Partner menu items (optional).
         
@@ -417,7 +417,7 @@ class BaseService(ABC):
         """
         return {}
     
-    async def search_users(self, query: str, limit: int = 10) -> list[dict]:
+    async def search_users(self, query: str, limit: int = 10) -> List[dict]:
         """
         Search service users.
         
