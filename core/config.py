@@ -46,6 +46,10 @@ class Config:
     CRYPTOBOT_API_TOKEN: Optional[str] = os.getenv("CRYPTOBOT_API_TOKEN")
     CRYPTOBOT_TESTNET: bool = os.getenv("CRYPTOBOT_TESTNET", "false").lower() == "true"
     
+    # === Platega (SBP) ===
+    PLATEGA_MERCHANT_ID: Optional[str] = os.getenv("PLATEGA_MERCHANT_ID")
+    PLATEGA_API_KEY: Optional[str] = os.getenv("PLATEGA_API_KEY")
+    
     # === Debug ===
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

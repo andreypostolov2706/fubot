@@ -96,6 +96,16 @@ async def topup_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif action == "stars_custom":
             await ask_stars_custom_amount(query, user_id, lang)
             return
+        elif action == "sbp":
+            await show_sbp_menu(query, user_id, lang)
+            return
+        elif action == "sbp_pay":
+            if len(parts) >= 3:
+                await create_sbp_payment(query, user_id, lang, int(parts[2]))
+            return
+        elif action == "sbp_custom":
+            await ask_sbp_custom_amount(query, user_id, lang)
+            return
     
     # Default: show main top-up menu
     await show_topup_menu(query, user_id, lang)
@@ -145,12 +155,12 @@ async def show_topup_menu(query, user_id: int, lang: str):
             "callback_data": "top_up:stars"
         }])
     
-    # TODO: Add more providers
-    # if provider_manager.is_provider_available("yookassa"):
-    #     keyboard.append([{
-    #         "text": "💳 Банковская карта", 
-    #         "callback_data": "top_up:card"
-    #     }])
+    # Platega (SBP)
+    if provider_manager.is_provider_available("platega"):
+        keyboard.append([{
+            "text": "🏦 СБП (Система быстрых платежей)", 
+            "callback_data": "top_up:sbp"
+        }])
     
     if not keyboard:
         text += "\n\n⚠️ Платёжные системы временно недоступны"
@@ -830,3 +840,217 @@ async def handle_stars_custom_input(update, context, user_id: int, lang: str):
     except Exception as e:
         logger.error(f"Failed to send Stars invoice: {e}")
         await update.message.reply_text(f"❌ Ошибка: {e}")
+
+
+# =============================================================================
+# СБП (PLATEGA)
+# =============================================================================
+
+# Predefined RUB amounts for SBP
+SBP_AMOUNTS = [100, 250, 500, 1000, 2500, 5000]
+
+
+async def show_sbp_menu(query, user_id: int, lang: str):
+    """Show SBP payment menu"""
+    gton_balance, fiat_balance = await get_user_balance_with_fiat(user_id)
+    
+    # Get GTON rate
+    try:
+        gton_rates = await currency_converter.get_gton_rates()
+        rub_rate = float(gton_rates.get("RUB", 100))
+    except:
+        rub_rate = 100.0
+    
+    text = "🏦 <b>Пополнение через СБП</b>\n\n"
+    text += f"💰 Баланс: {format_gton(gton_balance)} GTON\n"
+    text += f"💱 Курс: 1 GTON ≈ {rub_rate:.0f} ₽\n\n"
+    text += "Выберите сумму пополнения:\n\n"
+    
+    # Show conversion examples
+    for amount in [100, 500, 1000]:
+        gton = Decimal(str(amount)) / Decimal(str(rub_rate))
+        text += f"• {amount} ₽ → ~{format_gton(gton)} GTON\n"
+    
+    # Amount buttons
+    keyboard = []
+    row = []
+    for amount in SBP_AMOUNTS:
+        row.append({
+            "text": f"{amount} ₽",
+            "callback_data": f"top_up:sbp_pay:{amount}"
+        })
+        if len(row) == 3:
+            keyboard.append(row)
+            row = []
+    
+    if row:
+        keyboard.append(row)
+    
+    # Custom amount button
+    keyboard.append([{"text": "✏️ Своя сумма", "callback_data": "top_up:sbp_custom"}])
+    keyboard.append([{"text": t(lang, "COMMON.back"), "callback_data": "top_up"}])
+    
+    await query.edit_message_text(
+        text,
+        reply_markup=build_keyboard(keyboard),
+        parse_mode="HTML"
+    )
+
+
+async def create_sbp_payment(query, user_id: int, lang: str, rub_amount: int):
+    """Create SBP payment via Platega"""
+    # Convert RUB to GTON
+    try:
+        gton_rates = await currency_converter.get_gton_rates()
+        rub_rate = float(gton_rates.get("RUB", 100))
+        gton_amount = Decimal(str(rub_amount)) / Decimal(str(rub_rate))
+    except Exception as e:
+        await query.answer(f"Ошибка конвертации: {e}", show_alert=True)
+        return
+    
+    # Show loading
+    await query.edit_message_text(
+        "⏳ Создаём платёж...",
+        parse_mode="HTML"
+    )
+    
+    # Create payment
+    result = await payment_service.create_payment(
+        user_id=user_id,
+        amount_gton=gton_amount,
+        provider="platega",
+        currency="RUB"
+    )
+    
+    if not result.success:
+        text = f"❌ <b>Ошибка создания платежа</b>\n\n{result.error}"
+        keyboard = [[{"text": t(lang, "COMMON.back"), "callback_data": "top_up:sbp"}]]
+        await query.edit_message_text(
+            text,
+            reply_markup=build_keyboard(keyboard),
+            parse_mode="HTML"
+        )
+        return
+    
+    # Success - show payment link
+    text = f"✅ <b>Платёж создан!</b>\n\n"
+    text += f"💵 Сумма: {rub_amount} ₽\n"
+    text += f"💰 Получите: ~{format_gton(gton_amount)} GTON\n\n"
+    text += f"Нажмите кнопку ниже для оплаты через СБП:\n"
+    text += f"<i>⏰ Платёж действителен 15 минут</i>"
+    
+    keyboard = [
+        [{"text": f"💳 Оплатить {rub_amount} ₽", "url": result.payment_url}],
+        [{"text": "🔄 Проверить оплату", "callback_data": f"top_up:check:{result.payment_uuid}"}],
+        [{"text": t(lang, "COMMON.back"), "callback_data": "top_up:sbp"}]
+    ]
+    
+    await query.edit_message_text(
+        text,
+        reply_markup=build_keyboard(keyboard),
+        parse_mode="HTML"
+    )
+    
+    logger.info(f"SBP payment created: {result.payment_uuid} for user {user_id}, {rub_amount} RUB")
+
+
+async def ask_sbp_custom_amount(query, user_id: int, lang: str):
+    """Ask user to enter custom SBP amount"""
+    from core.plugins.core_api import CoreAPI
+    
+    # Set state
+    core_api = CoreAPI("core")
+    await core_api.set_user_state(user_id, "sbp_custom_amount", {})
+    
+    text = "✏️ <b>Введите сумму в рублях</b>\n\n"
+    text += "Минимум: 50 ₽\n"
+    text += "Максимум: 100 000 ₽\n\n"
+    text += "Введите число:"
+    
+    keyboard = [
+        [{"text": "❌ Отмена", "callback_data": "top_up:sbp"}]
+    ]
+    
+    await query.edit_message_text(
+        text,
+        reply_markup=build_keyboard(keyboard),
+        parse_mode="HTML"
+    )
+
+
+async def handle_sbp_custom_input(update, context, user_id: int, lang: str):
+    """Handle custom SBP amount input"""
+    from core.plugins.core_api import CoreAPI
+    
+    core_api = CoreAPI("core")
+    text_input = update.message.text.strip()
+    
+    # Parse amount
+    try:
+        rub_amount = int(text_input.replace(" ", "").replace(",", ""))
+    except ValueError:
+        await update.message.reply_text("❌ Введите целое число")
+        return
+    
+    # Validate
+    if rub_amount < 50:
+        await update.message.reply_text("❌ Минимальная сумма: 50 ₽")
+        return
+    
+    if rub_amount > 100000:
+        await update.message.reply_text("❌ Максимальная сумма: 100 000 ₽")
+        return
+    
+    # Clear state
+    await core_api.clear_user_state(user_id)
+    
+    # Convert RUB to GTON
+    try:
+        gton_rates = await currency_converter.get_gton_rates()
+        rub_rate = float(gton_rates.get("RUB", 100))
+        gton_amount = Decimal(str(rub_amount)) / Decimal(str(rub_rate))
+    except Exception as e:
+        await update.message.reply_text(f"❌ Ошибка конвертации: {e}")
+        return
+    
+    # Show loading
+    loading_msg = await update.message.reply_text(
+        "⏳ Создаём платёж...",
+        parse_mode="HTML"
+    )
+    
+    # Create payment
+    result = await payment_service.create_payment(
+        user_id=user_id,
+        amount_gton=gton_amount,
+        provider="platega",
+        currency="RUB"
+    )
+    
+    if not result.success:
+        await loading_msg.edit_text(
+            f"❌ <b>Ошибка создания платежа</b>\n\n{result.error}",
+            parse_mode="HTML"
+        )
+        return
+    
+    # Success - show payment link
+    text = f"✅ <b>Платёж создан!</b>\n\n"
+    text += f"💵 Сумма: {rub_amount} ₽\n"
+    text += f"💰 Получите: ~{format_gton(gton_amount)} GTON\n\n"
+    text += f"Нажмите кнопку ниже для оплаты через СБП:\n"
+    text += f"<i>⏰ Платёж действителен 15 минут</i>"
+    
+    keyboard = [
+        [{"text": f"💳 Оплатить {rub_amount} ₽", "url": result.payment_url}],
+        [{"text": "🔄 Проверить оплату", "callback_data": f"top_up:check:{result.payment_uuid}"}],
+        [{"text": t(lang, "COMMON.back"), "callback_data": "top_up:sbp"}]
+    ]
+    
+    await loading_msg.edit_text(
+        text,
+        reply_markup=build_keyboard(keyboard),
+        parse_mode="HTML"
+    )
+    
+    logger.info(f"SBP custom payment created: {result.payment_uuid} for user {user_id}, {rub_amount} RUB")

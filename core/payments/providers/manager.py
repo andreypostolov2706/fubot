@@ -9,6 +9,7 @@ from loguru import logger
 from core.config import config
 from .base import BasePaymentProvider
 from .cryptobot import CryptoBotProvider
+from .platega import PlategalProvider
 
 
 class ProviderManager:
@@ -39,6 +40,21 @@ class ProviderManager:
                 logger.info("CryptoBot provider initialized")
             else:
                 logger.warning(f"CryptoBot config invalid: {error}")
+        
+        # Initialize Platega (SBP)
+        platega_merchant_id = getattr(config, 'PLATEGA_MERCHANT_ID', None)
+        platega_api_key = getattr(config, 'PLATEGA_API_KEY', None)
+        if platega_merchant_id and platega_api_key:
+            platega = PlategalProvider({
+                "merchant_id": platega_merchant_id,
+                "api_key": platega_api_key
+            })
+            is_valid, error = platega.validate_config()
+            if is_valid:
+                self._providers["platega"] = platega
+                logger.info("Platega provider initialized")
+            else:
+                logger.warning(f"Platega config invalid: {error}")
         
         # TODO: Add other providers here
         # if config.YOOKASSA_SHOP_ID:
