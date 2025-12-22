@@ -46,8 +46,13 @@ async def service_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not service:
         await query.answer("Service not found", show_alert=True)
         return
-    
-    await query.answer()
+
+    try:
+        await query.answer()
+    except Exception as e:
+        # If update processing was delayed, Telegram may reject callback answer
+        # with "Query is too old and response timeout expired".
+        logger.warning(f"Failed to answer callback query (ignored): {e}")
     
     # Build context
     ctx = CallbackContext(
