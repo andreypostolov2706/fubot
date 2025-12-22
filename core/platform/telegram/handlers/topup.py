@@ -141,6 +141,13 @@ async def show_topup_menu(query, user_id: int, lang: str):
     
     keyboard = []
     
+    # Platega (SBP) - первое место
+    if provider_manager.is_provider_available("platega"):
+        keyboard.append([{
+            "text": "🏦 СБП (Россия)", 
+            "callback_data": "top_up:sbp"
+        }])
+    
     if provider_manager.is_provider_available("cryptobot"):
         keyboard.append([{
             "text": "🤖 CryptoBot (TON, USDT)", 
@@ -153,13 +160,6 @@ async def show_topup_menu(query, user_id: int, lang: str):
         keyboard.append([{
             "text": "⭐ Telegram Stars", 
             "callback_data": "top_up:stars"
-        }])
-    
-    # Platega (SBP)
-    if provider_manager.is_provider_available("platega"):
-        keyboard.append([{
-            "text": "🏦 СБП (Система быстрых платежей)", 
-            "callback_data": "top_up:sbp"
         }])
     
     if not keyboard:

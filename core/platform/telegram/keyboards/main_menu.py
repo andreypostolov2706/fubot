@@ -66,9 +66,9 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
             callback="service:astrology:child",
             order=3
         ),
-        # 4. Гороскоп на сегодня (Подписка) (одна колонка)
+        # 4. Ежедневный гороскоп (Подписка) (одна колонка)
         MenuItem(
-            text=f"{daily_icon} Гороскоп на сегодня",
+            text=f"{daily_icon} Ежедневный гороскоп",
             callback="service:astrology:daily_toggle",
             order=4,
             full_width=True

@@ -90,13 +90,8 @@ class AstrologyService(BaseService):
     
     def get_user_menu_items(self, user_id: int, user_data) -> List[MenuItem]:
         """Пункты меню для пользователя"""
-        return [
-            MenuItem(
-                text="📋 Все услуги",
-                callback="service:astrology:menu",
-                order=15,
-            )
-        ]
+        # Все пункты уже добавлены в main_menu.py
+        return []
     
     def get_loading_text(self, action: str, params: dict = None) -> Optional[str]:
         """Текст загрузки для долгих операций"""

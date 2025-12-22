@@ -212,7 +212,7 @@ class PlategalProvider(BasePaymentProvider):
         try:
             logger.debug(f"Checking Platega payment status: {provider_payment_id}")
             
-            result = await self._request("GET", f"transaction/status/{provider_payment_id}")
+            result = await self._request("GET", f"transaction/{provider_payment_id}")
             
             status = result.get("status", "").upper()
             
