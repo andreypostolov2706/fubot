@@ -74,6 +74,22 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
             callback="service:astrology:daily_toggle",
             order=9
         ),
+        # Мои карты, История, Настройки
+        MenuItem(
+            text="🗂 Мои карты",
+            callback="service:astrology:cards",
+            order=15
+        ),
+        MenuItem(
+            text="📜 История",
+            callback="service:astrology:history",
+            order=16
+        ),
+        MenuItem(
+            text="⚙️ Настройки",
+            callback="service:astrology:settings",
+            order=17
+        ),
         # Основные пункты меню
         MenuItem(
             text=t(lang, "MAIN_MENU.top_up"), 

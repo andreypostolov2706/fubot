@@ -452,10 +452,6 @@ def main_menu_keyboard_list(prices: dict, has_profile: bool = True) -> List[List
         [{"text": f"{t('btn_transits')} — {prices.get('transits', 3)} GTON", "callback_data": cb("transits")}],
         [{"text": f"{t('btn_compatibility')} — {prices.get('compatibility', 8)} GTON", "callback_data": cb("compat")}],
         [{"text": f"❓ Задать вопрос — {prices.get('question', 5)} GTON", "callback_data": cb("question")}],
-        [{"text": t("btn_my_charts"), "callback_data": cb("charts")}],
-        [{"text": t("btn_history"), "callback_data": cb("history")}],
-        [{"text": t("btn_subscriptions"), "callback_data": cb("subs")}],
-        [{"text": t("btn_settings"), "callback_data": cb("settings")}],
         [{"text": t("btn_back"), "callback_data": "main_menu"}],
     ]
 
