@@ -1,0 +1,3 @@
+"""
+FuBot Tests Package
+"""

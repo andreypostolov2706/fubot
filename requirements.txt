@@ -1,0 +1,29 @@
+# FuBot Core Requirements
+
+# Telegram Bot
+python-telegram-bot==21.0.1
+
+# Database
+sqlalchemy==2.0.25
+aiosqlite==0.19.0
+
+# Environment
+python-dotenv==1.0.0
+
+# Async
+asyncio==3.4.3
+
+# Utilities
+pydantic==2.5.3
+
+# Payments (optional)
+# yookassa==3.0.0
+
+# Logging
+loguru==0.7.2
+
+# Astrology Service
+kerykeion>=5.0.0
+timezonefinder>=6.2.0
+geopy>=2.4.0
+openai>=1.0.0

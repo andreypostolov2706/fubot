@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <div class="header-icon">👶</div>
+    <h1>Детский гороскоп</h1>
+    <div class="subtitle">{{ child_name }}, {{ child_age }} лет</div>
+</div>
+
+<div class="user-info">
+    <div class="sign">
+        <span class="sign-icon">☀️</span>
+        <span class="sign-name">{{ sun_sign }}</span>
+    </div>
+    <div class="divider"></div>
+    <div class="sign">
+        <span class="sign-icon">🌙</span>
+        <span class="sign-name">{{ moon_sign }}</span>
+    </div>
+</div>
+
+<div class="content">
+    {{ content | safe }}
+</div>
+{% endblock %}

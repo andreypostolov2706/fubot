@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <div class="header-icon">🌟</div>
+    <h1>Натальная карта</h1>
+    <div class="subtitle">Персональный астрологический анализ</div>
+</div>
+
+<div class="user-info">
+    <div class="sign">
+        <span class="sign-icon">☀️</span>
+        <span class="sign-name">{{ sun_sign }}</span>
+    </div>
+    <div class="divider"></div>
+    <div class="sign">
+        <span class="sign-icon">🌙</span>
+        <span class="sign-name">{{ moon_sign }}</span>
+    </div>
+    <div class="divider"></div>
+    <div class="sign">
+        <span class="sign-icon">⬆️</span>
+        <span class="sign-name">{{ asc_sign }}</span>
+    </div>
+</div>
+
+<div class="content">
+    {{ content | safe }}
+</div>
+{% endblock %}

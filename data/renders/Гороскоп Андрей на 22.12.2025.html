@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гороскоп Андрей на 22.12.2025</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 40px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .header .subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+        }
+        
+        .user-info .sign {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .user-info .sign-icon {
+            font-size: 32px;
+        }
+        
+        .user-info .sign-name {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .user-info .divider {
+            width: 1px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .content {
+            line-height: 1.8;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .content h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffd700;
+            margin: 25px 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content h2:first-child {
+            margin-top: 0;
+        }
+        
+        .content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #87ceeb;
+            margin: 20px 0 10px 0;
+        }
+        
+        .content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .content ul, .content ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .content li {
+            margin-bottom: 8px;
+        }
+        
+        .content strong {
+            color: #ffd700;
+            font-weight: 600;
+        }
+        
+        .content em {
+            color: #87ceeb;
+            font-style: normal;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border-left: 3px solid #ffd700;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-content {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .footer .logo {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+        
+        /* Знаки зодиака */
+        .zodiac-aries { color: #ff6b6b; }
+        .zodiac-taurus { color: #4ecdc4; }
+        .zodiac-gemini { color: #ffe66d; }
+        .zodiac-cancer { color: #c7ecee; }
+        .zodiac-leo { color: #ffa502; }
+        .zodiac-virgo { color: #a8e6cf; }
+        .zodiac-libra { color: #ffc8dd; }
+        .zodiac-scorpio { color: #9b59b6; }
+        .zodiac-sagittarius { color: #e74c3c; }
+        .zodiac-capricorn { color: #7f8c8d; }
+        .zodiac-aquarius { color: #3498db; }
+        .zodiac-pisces { color: #9b59b6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+<div class="header">
+    <div class="header-icon">☀️</div>
+    <h1>Гороскоп на сегодня</h1>
+    <div class="subtitle">22 December 2025</div>
+</div>
+
+<div class="user-info">
+    <div class="sign">
+        <span class="sign-icon">♋</span>
+        <span class="sign-name">Рак</span>
+    </div>
+</div>
+
+<div class="content">
+    <p>☀️ <strong>Общий настрой дня</strong></p>
+<p>Сегодня энергетика дня несёт в себе смесь глубины и внезапных озарений. Ваше Солнце в Раке и Луна в Водолее создают интересный контраст: эмоциональная чувствительность встречается с потребностью в свободе и новизне. Возможны неожиданные идеи или встречи, которые помогут взглянуть на привычные ситуации под другим углом. День благоприятен для творчества и общения, но важно сохранять внутренний баланс.</p>
+<p>⏰ <strong>Благоприятные часы</strong></p>
+<p>Лучшее время для важных дел — с 10:00 до 12:00, когда Луна формирует гармоничный аспект с Меркурием, усиливая ясность мыслей и коммуникацию. Также удачный период — с 16:00 до 18:00, благодаря поддержке Венеры в вашем Асценденте, что придаст обаяния и уверенности в личных или творческих начинаниях.</p>
+<p>💡 <strong>Совет дня</strong></p>
+<p>Позвольте себе небольшой эксперимент в общении или работе — например, предложите нестандартное решение коллегам или близким. Ваш ум сегодня гибок, и это может привести к полезным инновациям.</p>
+<p>⚠️ <strong>На что обратить внимание</strong></p>
+<p>Из-за напряжённых аспектов с Ураном возможны внезапные изменения планов. Старайтесь сохранять спокойствие и не принимайте поспешных решений, особенно в финансовых или эмоциональных вопросах.</p>
+<p>🍀 <strong>Счастливое число и цвет</strong></p>
+<p>Число дня: 7</p>
+<p>Цвет дня: серебристо-голубой (символизирует интуицию и свежесть мыслей).</p>
+</div>
+
+        
+        <div class="footer">
+            <div class="logo">🔮 Астрология</div>
+            <div>22.12.2025</div>
+        </div>
+    </div>
+</body>
+</html>

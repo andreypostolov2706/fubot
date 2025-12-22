@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block header %}
+<div class="header">
+    <div class="icon">❓</div>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">{{ question_text[:100] }}{% if question_text|length > 100 %}...{% endif %}</p>
+</div>
+{% endblock %}
+
+{% block signs %}
+<div class="signs">
+    {% for person in persons %}
+    <div class="sign-item">
+        <span class="sign-emoji">{{ person.emoji }}</span>
+        <span class="sign-name">{{ person.name }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="question-box">
+    <div class="question-label">Ваш вопрос:</div>
+    <div class="question-text">{{ question_text }}</div>
+</div>
+
+<div class="content">
+    {{ content | safe }}
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+.question-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #ffd700;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    border-radius: 0 8px 8px 0;
+}
+
+.question-label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.question-text {
+    font-size: 16px;
+    color: #fff;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.signs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.sign-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sign-emoji {
+    font-size: 20px;
+}
+
+.sign-name {
+    font-size: 14px;
+    color: #fff;
+}
+</style>
+{% endblock %}

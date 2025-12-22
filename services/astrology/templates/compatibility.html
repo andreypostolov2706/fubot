@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <div class="header-icon">💑</div>
+    <h1>Совместимость</h1>
+    <div class="subtitle">Астрологический анализ отношений</div>
+</div>
+
+<div class="user-info">
+    <div class="sign">
+        <span class="sign-icon">{{ person1_emoji }}</span>
+        <span class="sign-name">{{ person1_name }}</span>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size: 24px;">❤️</div>
+    <div class="divider"></div>
+    <div class="sign">
+        <span class="sign-icon">{{ person2_emoji }}</span>
+        <span class="sign-name">{{ person2_name }}</span>
+    </div>
+</div>
+
+<div class="content">
+    {{ content | safe }}
+</div>
+{% endblock %}

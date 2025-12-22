@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <div class="header-icon">☀️</div>
+    <h1>Гороскоп на сегодня</h1>
+    <div class="subtitle">{{ date_formatted }}</div>
+</div>
+
+<div class="user-info">
+    <div class="sign">
+        <span class="sign-icon">{{ sun_emoji }}</span>
+        <span class="sign-name">{{ sun_sign }}</span>
+    </div>
+</div>
+
+<div class="content">
+    {{ content | safe }}
+</div>
+{% endblock %}
