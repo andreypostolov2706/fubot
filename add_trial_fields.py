@@ -5,7 +5,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "data" / "bot.db"
+DB_PATH = Path(__file__).parent / "data" / "core.db"
 
 
 def add_trial_fields():
