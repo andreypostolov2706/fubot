@@ -292,6 +292,11 @@ async def main():
         from core.referral.notifications import set_bot as set_referral_bot
         set_referral_bot(telegram_bot.application.bot)
         
+        # Set bot for astrology daily horoscopes
+        from services.astrology.tasks import send_daily_horoscopes
+        from core.plugins.core_api import CoreAPI
+        core_api = CoreAPI()
+        
         # Start trigger processor as background task
         trigger_task = asyncio.create_task(process_triggers())
         
@@ -300,6 +305,20 @@ async def main():
         
         # Start payment checker as background task
         payment_task = asyncio.create_task(payment_checker_task())
+        
+        # Start daily horoscope sender as background task
+        async def daily_horoscope_loop():
+            while True:
+                try:
+                    await send_daily_horoscopes(telegram_bot.application.bot, core_api)
+                    await asyncio.sleep(60)  # Check every minute
+                except asyncio.CancelledError:
+                    break
+                except Exception as e:
+                    logger.error(f"Error in daily horoscope task: {e}")
+                    await asyncio.sleep(60)
+        
+        horoscope_task = asyncio.create_task(daily_horoscope_loop())
         
         logger.info("FuBot Core is running. Press Ctrl+C to stop.")
         
@@ -310,6 +329,7 @@ async def main():
         trigger_task.cancel()
         rates_task.cancel()
         payment_task.cancel()
+        horoscope_task.cancel()
         try:
             await trigger_task
         except asyncio.CancelledError:
@@ -320,6 +340,10 @@ async def main():
             pass
         try:
             await payment_task
+        except asyncio.CancelledError:
+            pass
+        try:
+            await horoscope_task
         except asyncio.CancelledError:
             pass
         
