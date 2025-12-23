@@ -429,9 +429,17 @@ class AstrologyService(BaseService):
             return await self._save_profile(user_id)
         
         elif action == "time_select":
-            # Выбор времени для ежедневного гороскопа
+            # Выбор времени для ежедневного гороскопа (онбординг или настройки)
             time_str = params[1] if len(params) > 1 else "09:00"
-            return await self._activate_daily_subscription(user_id, time_str)
+            
+            # Проверяем, есть ли уже профиль
+            profile = await self.get_profile(user_id)
+            if profile:
+                # Обновляем существующий профиль
+                return await self._update_daily_time(user_id, time_str)
+            else:
+                # Активируем для нового профиля
+                return await self._activate_daily_subscription(user_id, time_str)
         
         elif action == "time_custom":
             # Ввод своего времени
@@ -730,6 +738,49 @@ class AstrologyService(BaseService):
             text=text,
             keyboard=kb.onboarding_complete_keyboard_list(),
             clear_state=True,
+            action="send",
+        )
+    
+    async def _update_daily_time(self, user_id: int, time_str: str) -> Response:
+        """Обновить время доставки ежедневного гороскопа"""
+        profile = await self.get_profile(user_id)
+        if not profile:
+            return Response(text="Профиль не найден", action="answer")
+        
+        # Парсим время
+        try:
+            hour, minute = time_str.split(":")
+            send_time = time(int(hour), int(minute))
+        except:
+            send_time = time(9, 0)
+        
+        # Обновляем время
+        async with get_db() as session:
+            result = await session.execute(
+                select(UserAstrologyProfile).where(UserAstrologyProfile.user_id == user_id)
+            )
+            prof = result.scalar_one_or_none()
+            if prof:
+                was_enabled = prof.daily_horoscope_enabled
+                prof.daily_horoscope_enabled = True
+                prof.subscription_send_time = send_time
+                prof.subscription_tz = prof.birth_tz
+                
+                # Если подписка была выключена, даём новый триал
+                if not was_enabled:
+                    prof.trial_days_left = 4
+                    prof.trial_started_at = datetime.now()
+                
+                await session.commit()
+        
+        # Показываем подтверждение
+        text = f"✅ Время доставки обновлено!\n\n"
+        text += f"⏰ Новое время: {time_str}\n\n"
+        text += f"Вы будете получать гороскоп каждый день в {time_str}."
+        
+        return Response(
+            text=text,
+            keyboard=[[{"text": "⚙️ Настройки", "callback_data": kb.cb("settings")}]],
             action="send",
         )
     
@@ -2499,16 +2550,40 @@ class AstrologyService(BaseService):
             text += f"👤 Имя: {profile.name}\n"
             text += f"📅 Дата рождения: {profile.birth_date.strftime('%d.%m.%Y')}\n"
             text += f"⏰ Время: {profile.birth_time.strftime('%H:%M')}\n"
-            text += f"🌍 Город: {profile.birth_city}\n"
+            text += f"🌍 Город: {profile.birth_city}\n\n"
+            
+            # Информация о подписке на ежедневный гороскоп
+            if profile.daily_horoscope_enabled:
+                text += f"🔮 <b>Ежедневный гороскоп</b>\n"
+                text += f"Статус: ✅ Включен\n"
+                if profile.subscription_send_time:
+                    text += f"Время: {profile.subscription_send_time.strftime('%H:%M')}\n"
+                
+                if profile.trial_days_left > 0:
+                    text += f"🎁 Бесплатных дней: {profile.trial_days_left}\n"
+                else:
+                    price = await self.get_price("daily_horoscope")
+                    text += f"💰 Стоимость: {price} GTON/день\n"
+            else:
+                text += f"🔮 <b>Ежедневный гороскоп</b>\n"
+                text += f"Статус: ❌ Выключен\n"
             
             buttons = [
                 [{"text": "✏️ Изменить имя", "callback_data": kb.cb("settings", "edit", "name")}],
                 [{"text": "📅 Изменить дату", "callback_data": kb.cb("settings", "edit", "date")}],
                 [{"text": "⏰ Изменить время", "callback_data": kb.cb("settings", "edit", "time")}],
                 [{"text": "🌍 Изменить город", "callback_data": kb.cb("settings", "edit", "city")}],
-                [{"text": "🗑 Удалить профиль", "callback_data": kb.cb("settings", "delete")}],
-                [{"text": t("btn_back"), "callback_data": kb.cb("menu")}],
             ]
+            
+            # Кнопка управления подпиской
+            if profile.daily_horoscope_enabled:
+                buttons.append([{"text": "🕐 Изменить время доставки", "callback_data": kb.cb("settings", "daily_time")}])
+                buttons.append([{"text": "❌ Отключить ежедневный гороскоп", "callback_data": kb.cb("settings", "daily_off")}])
+            else:
+                buttons.append([{"text": "✅ Включить ежедневный гороскоп", "callback_data": kb.cb("settings", "daily_on")}])
+            
+            buttons.append([{"text": "🗑 Удалить профиль", "callback_data": kb.cb("settings", "delete")}])
+            buttons.append([{"text": t("btn_back"), "callback_data": kb.cb("menu")}])
             
             return Response(text=text, keyboard=buttons)
         
@@ -2569,6 +2644,36 @@ class AstrologyService(BaseService):
                         [{"text": "❌ Отмена", "callback_data": kb.cb("settings")}],
                     ],
                 )
+        
+        elif action == "daily_time":
+            # Изменить время доставки ежедневного гороскопа
+            return Response(
+                text="🕐 Выберите новое время для получения ежедневного гороскопа:",
+                keyboard=kb.onboarding_time_selection_keyboard_list(),
+            )
+        
+        elif action == "daily_on":
+            # Включить ежедневный гороскоп
+            return Response(
+                text="✅ Включить ежедневный гороскоп\n\nВыберите время для получения:",
+                keyboard=kb.onboarding_time_selection_keyboard_list(),
+            )
+        
+        elif action == "daily_off":
+            # Отключить ежедневный гороскоп
+            async with get_db() as session:
+                result = await session.execute(
+                    select(UserAstrologyProfile).where(UserAstrologyProfile.user_id == user_id)
+                )
+                prof = result.scalar_one_or_none()
+                if prof:
+                    prof.daily_horoscope_enabled = False
+                    await session.commit()
+            
+            return Response(
+                text="❌ Ежедневный гороскоп отключен.\n\nВы можете включить его снова в настройках.",
+                keyboard=[[{"text": "⚙️ Настройки", "callback_data": kb.cb("settings")}]],
+            )
         
         return Response(text="Неизвестное действие", action="answer")
     
