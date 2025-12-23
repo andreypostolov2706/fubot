@@ -108,12 +108,11 @@ class AstrologyRenderer:
         person_name: str = ""
     ) -> Optional[str]:
         """Рендерит натальную карту в HTML файл"""
+        title = f"Натальная карта {person_name}".strip() if person_name else "Натальная карта"
         try:
             template = self.env.get_template("natal_chart.html")
             
             html_content = self._markdown_to_html(content)
-            
-            title = f"Натальная карта {person_name}".strip() if person_name else "Натальная карта"
             
             html = template.render(
                 title=title,
@@ -134,10 +133,9 @@ class AstrologyRenderer:
             
             logger.info(f"Rendered natal chart to {output_path}")
             return str(output_path)
-            
         except Exception as e:
             logger.error(f"Error rendering natal chart: {e}")
-            return None
+            return self.render_generic(title=title, content=content, user_id=user_id)
     
     def render_daily(
         self,
@@ -148,17 +146,12 @@ class AstrologyRenderer:
         person_name: str = ""
     ) -> Optional[str]:
         """Рендерит ежедневный гороскоп в HTML файл"""
+        date_str = datetime.now().strftime("%d.%m.%Y")
+        title = f"Гороскоп {person_name} на {date_str}".strip() if person_name else f"Гороскоп на {date_str}"
         try:
             template = self.env.get_template("daily.html")
             
             html_content = self._markdown_to_html(content)
-            date_str = datetime.now().strftime("%d.%m.%Y")
-            bot_link = self._get_bot_link()
-            bot_link_html = ""
-            if bot_link:
-                bot_link_html = f'<div style="margin-top: 10px;"><a href="{bot_link}" target="_blank" rel="noopener noreferrer" style="color:#87ceeb;">Открыть бота в Telegram</a></div>'
-            
-            title = f"Гороскоп {person_name} на {date_str}".strip() if person_name else f"Гороскоп на {date_str}"
             
             html = template.render(
                 title=title,
@@ -179,10 +172,9 @@ class AstrologyRenderer:
             
             logger.info(f"Rendered daily horoscope to {output_path}")
             return str(output_path)
-            
         except Exception as e:
             logger.error(f"Error rendering daily horoscope: {e}")
-            return None
+            return self.render_generic(title=title, content=content, user_id=user_id)
     
     def render_compatibility(
         self,
@@ -194,12 +186,11 @@ class AstrologyRenderer:
         user_id: int
     ) -> Optional[str]:
         """Рендерит совместимость в HTML файл"""
+        title = f"Совместимость {person1_name} и {person2_name}"
         try:
             template = self.env.get_template("compatibility.html")
             
             html_content = self._markdown_to_html(content)
-            
-            title = f"Совместимость {person1_name} и {person2_name}"
             
             html = template.render(
                 title=title,
@@ -221,10 +212,9 @@ class AstrologyRenderer:
             
             logger.info(f"Rendered compatibility to {output_path}")
             return str(output_path)
-            
         except Exception as e:
             logger.error(f"Error rendering compatibility: {e}")
-            return None
+            return self.render_generic(title=title, content=content, user_id=user_id)
     
     def render_child(
         self,
@@ -236,12 +226,11 @@ class AstrologyRenderer:
         user_id: int
     ) -> Optional[str]:
         """Рендерит детский гороскоп в HTML файл"""
+        title = f"Детский гороскоп {child_name}"
         try:
             template = self.env.get_template("child.html")
             
             html_content = self._markdown_to_html(content)
-            
-            title = f"Детский гороскоп {child_name}"
             
             html = template.render(
                 title=title,
@@ -263,10 +252,9 @@ class AstrologyRenderer:
             
             logger.info(f"Rendered child horoscope to {output_path}")
             return str(output_path)
-            
         except Exception as e:
             logger.error(f"Error rendering child horoscope: {e}")
-            return None
+            return self.render_generic(title=title, content=content, user_id=user_id)
     
     def render_question(
         self,
@@ -275,14 +263,14 @@ class AstrologyRenderer:
         persons: list,  # [{"name": "Андрей", "emoji": "♈"}]
         user_id: int
     ) -> Optional[str]:
-        """Рендерит ответ на вопрос в HTML файл"""
+        """Рендерит вопрос астрологу в HTML файл"""
+        title = "Ответ астролога"
         try:
             template = self.env.get_template("question.html")
             
             html_content = self._markdown_to_html(content)
             
-            # Формируем название из имён
-            names = [p["name"] for p in persons]
+            names = [p.get("name") for p in persons if p.get("name")]
             if len(names) == 1:
                 title = f"Ответ астролога для {names[0]}"
             else:
@@ -306,10 +294,9 @@ class AstrologyRenderer:
             
             logger.info(f"Rendered question answer to {output_path}")
             return str(output_path)
-            
         except Exception as e:
             logger.error(f"Error rendering question answer: {e}")
-            return None
+            return self.render_generic(title=title, content=content, user_id=user_id)
 
     def render_generic(
         self,
@@ -321,6 +308,17 @@ class AstrologyRenderer:
         try:
             html_content = self._markdown_to_html(content)
             date_str = datetime.now().strftime("%d.%m.%Y")
+
+            bot_link = self._get_bot_link()
+            bot_link_html = ""
+            if bot_link:
+                bot_link_html = (
+                    f'<div style="margin-top: 10px;">'
+                    f'<a href="{bot_link}" target="_blank" rel="noopener noreferrer">'
+                    f'Открыть бота в Telegram'
+                    f'</a>'
+                    f'</div>'
+                )
 
             html = f"""<!DOCTYPE html>
 <html lang=\"ru\">
