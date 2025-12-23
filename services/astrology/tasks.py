@@ -20,18 +20,18 @@ async def send_daily_horoscopes(bot, core_api):
     """
     Отправка ежедневных гороскопов подписчикам.
     Вызывается каждую минуту.
+    Поддерживает триальный период (4 бесплатных дня) и платную отправку.
     """
     now = datetime.now()
     current_time = now.time()
     today = now.date()
     
     async with get_db() as session:
-        # Находим пользователей с активной подпиской и подходящим временем
+        # Находим пользователей с включенным ежедневным гороскопом
         result = await session.execute(
             select(UserAstrologyProfile).where(
                 and_(
-                    UserAstrologyProfile.subscription_until > now,
-                    UserAstrologyProfile.subscription_type == "daily",
+                    UserAstrologyProfile.daily_horoscope_enabled == True,
                     UserAstrologyProfile.subscription_send_time != None,
                 )
             )
@@ -63,6 +63,21 @@ async def send_daily_horoscopes(bot, core_api):
                 if existing.scalar_one_or_none():
                     continue
             
+            # Проверяем триал или баланс
+            is_trial = profile.trial_days_left > 0
+            
+            if not is_trial:
+                # Платная отправка - проверяем баланс
+                config = await core_api.get_service_config("astrology")
+                prices = config.get("prices", {})
+                price = Decimal(str(prices.get("daily_horoscope", 2)))
+                balance = await core_api.get_balance(profile.user_id)
+                
+                if balance < price:
+                    # Недостаточно средств - уведомляем
+                    await _notify_insufficient_balance(bot, profile, price, balance)
+                    continue
+            
             # Генерируем гороскоп
             chart_data = ChartData.from_dict(profile.chart_data or {})
             today_str = today.strftime("%d.%m.%Y")
@@ -70,7 +85,19 @@ async def send_daily_horoscopes(bot, core_api):
             try:
                 interpretation, tokens = await interpreter.interpret_daily(chart_data, today_str)
                 
-                # Отправляем пользователю
+                # Рендерим в HTML
+                from .renderer import renderer
+                from .config import get_sign_name, get_sign_emoji
+                
+                html_path = renderer.render_daily(
+                    content=interpretation,
+                    sun_sign=get_sign_name(chart_data.sun_sign),
+                    sun_emoji=get_sign_emoji(chart_data.sun_sign),
+                    user_id=profile.user_id,
+                    person_name=profile.name
+                )
+                
+                # Получаем пользователя
                 from core.database.models import User
                 async with get_db() as session:
                     user_result = await session.execute(
@@ -79,11 +106,40 @@ async def send_daily_horoscopes(bot, core_api):
                     user = user_result.scalar_one_or_none()
                 
                 if user and user.telegram_id:
-                    await bot.send_message(
-                        chat_id=user.telegram_id,
-                        text=f"☀️ <b>Ваш гороскоп на {today_str}</b>\n\n{interpretation}",
-                        parse_mode="HTML"
-                    )
+                    # Списываем средства если не триал
+                    if not is_trial:
+                        await core_api.deduct_balance(profile.user_id, price, "Ежедневный гороскоп")
+                    
+                    # Отправляем HTML документ
+                    if html_path:
+                        await bot.send_document(
+                            chat_id=user.telegram_id,
+                            document=open(html_path, 'rb'),
+                            caption=f"☀️ <b>Ваш гороскоп на {today_str}</b>",
+                            parse_mode="HTML"
+                        )
+                    else:
+                        # Fallback на текст если HTML не создался
+                        await bot.send_message(
+                            chat_id=user.telegram_id,
+                            text=f"☀️ <b>Ваш гороскоп на {today_str}</b>\n\n{interpretation}",
+                            parse_mode="HTML"
+                        )
+                    
+                    # Уменьшаем счетчик триала
+                    if is_trial:
+                        async with get_db() as session:
+                            result = await session.execute(
+                                select(UserAstrologyProfile).where(UserAstrologyProfile.id == profile.id)
+                            )
+                            prof = result.scalar_one_or_none()
+                            if prof:
+                                prof.trial_days_left -= 1
+                                await session.commit()
+                                
+                                # Уведомляем об окончании триала
+                                if prof.trial_days_left == 0:
+                                    await _notify_trial_ended(bot, prof, price)
                 
                 # Логируем успех
                 async with get_db() as session:
@@ -306,3 +362,69 @@ async def send_expiration_reminders(bot, core_api):
             
         except Exception as e:
             logger.exception(f"Error sending expiration reminder to user {profile.user_id}: {e}")
+
+
+async def _notify_trial_ended(bot, profile: UserAstrologyProfile, daily_price: Decimal):
+    """Уведомление об окончании триального периода"""
+    try:
+        from core.database.models import User
+        from core.database import get_db
+        
+        async with get_db() as session:
+            user_result = await session.execute(
+                select(User).where(User.id == profile.user_id)
+            )
+            user = user_result.scalar_one_or_none()
+        
+        if user and user.telegram_id:
+            text = f"🎁 <b>Пробный период закончен!</b>\n\n"
+            text += f"Вы получили 4 бесплатных гороскопа.\n"
+            text += f"Теперь ежедневный гороскоп стоит {daily_price} GTON.\n\n"
+            text += f"Подписка активна и продолжит работать автоматически."
+            
+            await bot.send_message(
+                chat_id=user.telegram_id,
+                text=text,
+                parse_mode="HTML"
+            )
+            
+            logger.info(f"Trial ended notification sent to user {profile.user_id}")
+    except Exception as e:
+        logger.error(f"Failed to send trial ended notification to user {profile.user_id}: {e}")
+
+
+async def _notify_insufficient_balance(bot, profile: UserAstrologyProfile, price: Decimal, balance: Decimal):
+    """Уведомление о недостатке средств для ежедневного гороскопа"""
+    try:
+        from core.database.models import User
+        from core.database import get_db
+        
+        async with get_db() as session:
+            user_result = await session.execute(
+                select(User).where(User.id == profile.user_id)
+            )
+            user = user_result.scalar_one_or_none()
+        
+        if user and user.telegram_id:
+            text = f"⚠️ <b>Недостаточно средств для гороскопа</b>\n\n"
+            text += f"Сегодняшний гороскоп не отправлен.\n"
+            text += f"Нужно: {price} GTON\n"
+            text += f"Баланс: {balance} GTON\n\n"
+            text += f"Пополните баланс, чтобы продолжить получать гороскопы."
+            
+            from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+            keyboard = InlineKeyboardMarkup([
+                [InlineKeyboardButton("💰 Пополнить баланс", callback_data="top_up")],
+                [InlineKeyboardButton("❌ Отключить подписку", callback_data="service:astrology:daily_toggle")],
+            ])
+            
+            await bot.send_message(
+                chat_id=user.telegram_id,
+                text=text,
+                parse_mode="HTML",
+                reply_markup=keyboard
+            )
+            
+            logger.info(f"Insufficient balance notification sent to user {profile.user_id}")
+    except Exception as e:
+        logger.error(f"Failed to send insufficient balance notification to user {profile.user_id}: {e}")

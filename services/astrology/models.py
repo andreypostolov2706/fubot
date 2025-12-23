@@ -58,6 +58,10 @@ class UserAstrologyProfile(Base):
     subscription_auto_renew: Mapped[bool] = Column(Boolean, default=True)
     subscription_notified: Mapped[bool] = Column(Boolean, default=False)
     
+    # === Триальный период ===
+    trial_days_left: Mapped[int] = Column(Integer, default=4)  # Осталось бесплатных дней
+    trial_started_at: Mapped[Optional[datetime]] = Column(DateTime, nullable=True)  # Когда начался триал
+    
     # === Timestamps ===
     created_at: Mapped[datetime] = Column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[Optional[datetime]] = Column(

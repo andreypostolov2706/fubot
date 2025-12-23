@@ -138,6 +138,19 @@ def onboarding_confirm_keyboard() -> InlineKeyboardMarkup:
     ])
 
 
+def onboarding_time_selection_keyboard() -> InlineKeyboardMarkup:
+    """Выбор времени для ежедневного гороскопа"""
+    return build_keyboard([
+        [{"text": "🌅 07:00", "callback_data": cb("onboard", "time_select", "07:00")}],
+        [{"text": "☀️ 09:00", "callback_data": cb("onboard", "time_select", "09:00")}],
+        [{"text": "🌤 12:00", "callback_data": cb("onboard", "time_select", "12:00")}],
+        [{"text": "🌆 18:00", "callback_data": cb("onboard", "time_select", "18:00")}],
+        [{"text": "🌙 21:00", "callback_data": cb("onboard", "time_select", "21:00")}],
+        [{"text": "⏰ Другое время", "callback_data": cb("onboard", "time_custom")}],
+        [{"text": "⏭ Пропустить", "callback_data": cb("onboard", "time_skip")}],
+    ])
+
+
 def onboarding_complete_keyboard() -> InlineKeyboardMarkup:
     """Профиль создан"""
     return build_keyboard([
@@ -492,6 +505,19 @@ def onboarding_confirm_keyboard_list() -> List[List[dict]]:
     return [
         [{"text": t("confirm_save"), "callback_data": cb("onboard", "save")}],
         [{"text": t("confirm_edit"), "callback_data": cb("onboard", "edit")}],
+    ]
+
+
+def onboarding_time_selection_keyboard_list() -> List[List[dict]]:
+    """Выбор времени для ежедневного гороскопа (список)"""
+    return [
+        [{"text": "🌅 07:00", "callback_data": cb("onboard", "time_select", "07:00")}],
+        [{"text": "☀️ 09:00", "callback_data": cb("onboard", "time_select", "09:00")}],
+        [{"text": "🌤 12:00", "callback_data": cb("onboard", "time_select", "12:00")}],
+        [{"text": "🌆 18:00", "callback_data": cb("onboard", "time_select", "18:00")}],
+        [{"text": "🌙 21:00", "callback_data": cb("onboard", "time_select", "21:00")}],
+        [{"text": "⏰ Другое время", "callback_data": cb("onboard", "time_custom")}],
+        [{"text": "⏭ Пропустить", "callback_data": cb("onboard", "time_skip")}],
     ]
 
 

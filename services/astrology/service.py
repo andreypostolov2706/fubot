@@ -276,6 +276,10 @@ class AstrologyService(BaseService):
         elif state_name == "astro_question_text":
             return await self._process_question_text(user_id, text, state_data, context)
         
+        # Кастомное время для ежедневного гороскопа
+        elif state_name == "astro_onboard_custom_time":
+            return await self._process_custom_time(user_id, text, context)
+        
         return Response(text="", action="ignore")
     
     def _require_profile_response(self) -> Response:
@@ -424,6 +428,28 @@ class AstrologyService(BaseService):
             # Сохранение профиля
             return await self._save_profile(user_id)
         
+        elif action == "time_select":
+            # Выбор времени для ежедневного гороскопа
+            time_str = params[1] if len(params) > 1 else "09:00"
+            return await self._activate_daily_subscription(user_id, time_str)
+        
+        elif action == "time_custom":
+            # Ввод своего времени
+            await self.core.set_user_state(user_id, "astro_onboard_custom_time", {})
+            return Response(
+                text="⏰ Введите время в формате ЧЧ:ММ\n\nНапример: 08:30 или 19:00",
+                set_state="astro_onboard_custom_time",
+            )
+        
+        elif action == "time_skip":
+            # Пропустить настройку подписки
+            await self.core.clear_user_state(user_id)
+            return Response(
+                text="✅ Профиль создан!\n\nВы можете настроить ежедневный гороскоп позже в настройках.",
+                keyboard=kb.onboarding_complete_keyboard_list(),
+                clear_state=True,
+            )
+        
         return Response(text="Неизвестное действие", action="answer")
     
     async def _show_onboard_confirm(self, user_id: int, state_data: dict) -> Response:
@@ -521,20 +547,21 @@ class AstrologyService(BaseService):
             session.add(profile)
             await session.commit()
         
-        # Очищаем состояние
-        await self.core.clear_user_state(user_id)
-        
-        # Показываем результат
+        # Показываем результат с картой
         text = f"{t('profile_created_title')}\n\n"
         text += f"☀️ Солнце в {get_sign_name(chart_data.sun_sign)}\n"
         text += f"🌙 Луна в {get_sign_name(chart_data.moon_sign)}\n"
         text += f"⬆️ Асцендент в {get_sign_name(chart_data.ascendant_sign)}\n\n"
-        text += t("profile_created_text")
+        text += "🎁 <b>Бонус: 4 дня бесплатных гороскопов!</b>\n\n"
+        text += "Выберите время для получения ежедневного гороскопа:"
+        
+        # Переходим к выбору времени (не очищаем состояние)
+        await self.core.set_user_state(user_id, "astro_onboard_time_select", {})
         
         return Response(
             text=text,
-            keyboard=kb.onboarding_complete_keyboard_list(),
-            clear_state=True,
+            keyboard=kb.onboarding_time_selection_keyboard_list(),
+            set_state="astro_onboard_time_select",
             media_path=svg_path,
             media_type="document",
         )
@@ -640,6 +667,71 @@ class AstrologyService(BaseService):
                 keyboard=[[{"text": c["city"], "callback_data": f"service:astrology:onboard:city_select:{i}"}] for i, c in enumerate(cities[:5])] + [[{"text": t("step_city_retry"), "callback_data": "service:astrology:onboard:city_retry"}]],
                 action="send",
             )
+    
+    async def _process_custom_time(self, user_id: int, text: str, context: MessageContext) -> Response:
+        """Обработка ввода кастомного времени для ежедневного гороскопа"""
+        try:
+            parts = text.replace(".", ":").replace("-", ":").split(":")
+            if len(parts) != 2:
+                raise ValueError()
+            
+            hour, minute = int(parts[0]), int(parts[1])
+            
+            if hour < 0 or hour > 23 or minute < 0 or minute > 59:
+                raise ValueError()
+            
+            time_str = f"{hour:02d}:{minute:02d}"
+            return await self._activate_daily_subscription(user_id, time_str)
+            
+        except:
+            return Response(
+                text="❌ Неверный формат времени.\n\nВведите время в формате ЧЧ:ММ (например: 08:30)",
+                action="send"
+            )
+    
+    async def _activate_daily_subscription(self, user_id: int, time_str: str) -> Response:
+        """Активировать ежедневную подписку с триалом"""
+        profile = await self.get_profile(user_id)
+        if not profile:
+            return Response(text="Профиль не найден", action="answer")
+        
+        # Парсим время
+        try:
+            hour, minute = time_str.split(":")
+            send_time = time(int(hour), int(minute))
+        except:
+            send_time = time(9, 0)
+        
+        # Активируем подписку с триалом
+        async with get_db() as session:
+            result = await session.execute(
+                select(UserAstrologyProfile).where(UserAstrologyProfile.user_id == user_id)
+            )
+            prof = result.scalar_one_or_none()
+            if prof:
+                prof.daily_horoscope_enabled = True
+                prof.subscription_send_time = send_time
+                prof.subscription_tz = prof.birth_tz
+                prof.trial_days_left = 4
+                prof.trial_started_at = datetime.now()
+                await session.commit()
+        
+        # Очищаем состояние
+        await self.core.clear_user_state(user_id)
+        
+        # Показываем подтверждение
+        text = f"✅ Ежедневный гороскоп активирован!\n\n"
+        text += f"⏰ Время отправки: {time_str}\n"
+        text += f"🎁 Бесплатных дней: 4\n\n"
+        text += f"Вы будете получать персональный гороскоп каждый день в {time_str}.\n"
+        text += f"Первые 4 дня — бесплатно!"
+        
+        return Response(
+            text=text,
+            keyboard=kb.onboarding_complete_keyboard_list(),
+            clear_state=True,
+            action="send",
+        )
     
     # === Natal Chart Handler ===
     
