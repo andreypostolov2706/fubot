@@ -22,9 +22,7 @@ async def send_daily_horoscopes(bot, core_api):
     Вызывается каждую минуту.
     Поддерживает триальный период (4 бесплатных дня) и платную отправку.
     """
-    now = datetime.now()
-    current_time = now.time()
-    today = now.date()
+    import pytz
     
     async with get_db() as session:
         # Находим пользователей с включенным ежедневным гороскопом
@@ -44,6 +42,17 @@ async def send_daily_horoscopes(bot, core_api):
             send_time = profile.subscription_send_time
             if not send_time:
                 continue
+            
+            # Получаем текущее время в часовом поясе пользователя
+            user_tz = profile.subscription_tz or "UTC"
+            try:
+                tz = pytz.timezone(user_tz)
+            except:
+                tz = pytz.UTC
+            
+            now_user_tz = datetime.now(tz)
+            current_time = now_user_tz.time()
+            today = now_user_tz.date()
             
             # Проверяем, совпадает ли час и минута
             if send_time.hour != current_time.hour or send_time.minute != current_time.minute:
