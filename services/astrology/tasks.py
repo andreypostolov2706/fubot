@@ -54,6 +54,12 @@ async def send_daily_horoscopes(bot, core_api):
             current_time = now_user_tz.time()
             today = now_user_tz.date()
             
+            # Отладка: логируем проверку времени
+            logger.debug(f"Daily horoscope check: user={profile.user_id}, tz={user_tz}, "
+                        f"current={current_time.strftime('%H:%M')}, "
+                        f"target={send_time.strftime('%H:%M')}, "
+                        f"match={send_time.hour == current_time.hour and send_time.minute == current_time.minute}")
+            
             # Проверяем, совпадает ли час и минута
             if send_time.hour != current_time.hour or send_time.minute != current_time.minute:
                 continue
