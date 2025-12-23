@@ -37,6 +37,7 @@ async def send_daily_horoscopes(bot, core_api):
             )
         )
         profiles = list(result.scalars().all())
+        logger.info(f"Found {len(profiles)} users with daily horoscope enabled")
     
     for profile in profiles:
         try:
