@@ -306,7 +306,7 @@ async def main():
         try:
             from services.astrology.tasks import send_daily_horoscopes
             from core.plugins.core_api import CoreAPI
-            core_api = CoreAPI()
+            core_api = CoreAPI("astrology")
             
             async def daily_horoscope_loop():
                 while True:
