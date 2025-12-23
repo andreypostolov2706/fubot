@@ -24,6 +24,8 @@ async def send_daily_horoscopes(bot, core_api):
     """
     import pytz
     
+    logger.info("Daily horoscope task running...")
+    
     async with get_db() as session:
         # Находим пользователей с включенным ежедневным гороскопом
         result = await session.execute(
