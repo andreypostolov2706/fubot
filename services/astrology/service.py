@@ -314,7 +314,30 @@ class AstrologyService(BaseService):
         asc_display = get_sign_display(profile.ascendant_sign or "")
         
         text = f"{t('menu_title')}\n\n"
-        text += t("menu_subtitle", sun_sign=sun_display, asc_sign=asc_display)
+        text += f"Имя: {profile.name}\n"
+        text += f"📅 Дата рождения: {profile.birth_date.strftime('%d.%m.%Y')}\n"
+        text += f"⏰ Время: {profile.birth_time.strftime('%H:%M')}\n"
+        text += f"🌍 Город: {profile.birth_city}\n\n"
+        
+        # Информация о подписке на ежедневный гороскоп
+        if profile.daily_horoscope_enabled:
+            text += f"🔮 <b>Ежедневный гороскоп</b>\n"
+            text += f"Статус: ✅ Включен\n"
+            if profile.subscription_send_time:
+                text += f"Время: {profile.subscription_send_time.strftime('%H:%M')}\n"
+            
+            if profile.trial_days_left > 0:
+                text += f"🎁 Бесплатных дней: {profile.trial_days_left}\n\n"
+            else:
+                price = await self.get_price("daily_horoscope")
+                text += f"💰 Стоимость: {price} GTON/день\n\n"
+        else:
+            text += f"🔮 <b>Ежедневный гороскоп</b>\n"
+            text += f"Статус: ❌ Выключен\n\n"
+        
+        # Баланс
+        balance = await self.core.get_balance(user_id)
+        text += f"💰 Баланс: {balance} GTON"
         
         return Response(
             text=text,
