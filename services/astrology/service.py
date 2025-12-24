@@ -1499,9 +1499,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_love(chart_data)
 
             html_path = renderer.render_generic(
-                title=f"Любовный портрет {profile.name}",
+                title="Любовный портрет",
                 content=interpretation,
                 user_id=user_id,
+                icon="💕",
+                subtitle=f"{profile.name}",
             )
             
             async with get_db() as session:
@@ -1548,9 +1550,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_love(chart_data)
 
             html_path = renderer.render_generic(
-                title=f"Любовный портрет {chart.name}",
+                title="Любовный портрет",
                 content=interpretation,
                 user_id=user_id,
+                icon="💕",
+                subtitle=f"{chart.name}",
             )
             
             async with get_db() as session:
@@ -1672,9 +1676,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_forecast(chart_data, period_text, ["general"])
 
             html_path = renderer.render_generic(
-                title=f"Астропрогноз {person_name}: {period_data['name']}",
+                title="Астропрогноз",
                 content=interpretation,
                 user_id=user_id,
+                icon="🔮",
+                subtitle=f"{person_name} — {period_data['name']}",
             )
             
             async with get_db() as session:
@@ -1794,9 +1800,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_events(chart_data, period_text)
 
             html_path = renderer.render_generic(
-                title=f"График событий {person_name}: {period_data['name']}",
+                title="График событий",
                 content=interpretation,
                 user_id=user_id,
+                icon="📅",
+                subtitle=f"{person_name} — {period_data['name']}",
             )
             
             async with get_db() as session:
@@ -1933,9 +1941,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_transits(chart_data, today)
 
             html_path = renderer.render_generic(
-                title=f"Транзиты сейчас: {profile.name}",
+                title="Транзиты сейчас",
                 content=interpretation,
                 user_id=user_id,
+                icon="🌟",
+                subtitle=f"{profile.name}",
             )
             
             async with get_db() as session:
@@ -1981,9 +1991,11 @@ class AstrologyService(BaseService):
             interpretation, tokens = await interpreter.interpret_transits(chart_data, today)
 
             html_path = renderer.render_generic(
-                title=f"Транзиты сейчас: {chart.name}",
+                title="Транзиты сейчас",
                 content=interpretation,
                 user_id=user_id,
+                icon="🌟",
+                subtitle=f"{chart.name}",
             )
             
             async with get_db() as session:
