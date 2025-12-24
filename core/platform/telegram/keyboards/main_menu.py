@@ -52,66 +52,80 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
         # 1. Натальная карта (одна колонка)
         MenuItem(
             text="🌟 Натальная карта",
-            callback="service:astrology:natal",
+            callback="service:astrology:natal:from=main",
             order=1,
             full_width=True
         ),
-        # 2. Совместимость 3. Детский (две колонки)
+        # 2. Совместимость | Детский (две колонки)
         MenuItem(
             text="💑 Совместимость",
-            callback="service:astrology:compat",
+            callback="service:astrology:compat:from=main",
             order=2
         ),
         MenuItem(
             text="👶 Детский",
-            callback="service:astrology:child",
+            callback="service:astrology:child:from=main",
             order=3
         ),
-        # 4. Ежедневный гороскоп (Подписка) (одна колонка)
+        # 3. Любовный гороскоп (одна колонка)
         MenuItem(
-            text=f"{daily_icon} Ежедневный гороскоп",
-            callback="service:astrology:daily_toggle",
+            text="💖 Любовный гороскоп",
+            callback="service:astrology:love:from=main",
             order=4,
             full_width=True
         ),
-        # 5. Все услуги 6. История (две колонки)
+        # 4. Задать вопрос Люцине (одна колонка)
+        MenuItem(
+            text="❓ Задать вопрос Люцине",
+            callback="service:astrology:question:from=main",
+            order=5,
+            full_width=True
+        ),
+        # 5. Ежедневный гороскоп (Подписка) (одна колонка)
+        MenuItem(
+            text=f"{daily_icon} Ежедневный гороскоп",
+            callback="service:astrology:daily_toggle",
+            order=6,
+            full_width=True
+        ),
+        # 6. Все услуги | История (две колонки)
         MenuItem(
             text="📋 Все услуги",
             callback="service:astrology:menu",
-            order=5
+            order=7
         ),
         MenuItem(
             text="📜 История",
             callback="service:astrology:history",
-            order=6
+            order=8
         ),
-        # 7. Мои карты 8. Настройки (две колонки)
+        # 7. Мои карты | Настройки (две колонки)
         MenuItem(
             text="🗂 Мои карты",
-            callback="service:astrology:cards",
-            order=7
+            callback="service:astrology:charts",
+            order=9
         ),
         MenuItem(
             text="⚙️ Настройки",
             callback="service:astrology:settings",
-            order=8
+            order=10
         ),
-        # 9. Пополнить 10. Помощь (две колонки)
+        # 8. Пополнить | Помощь (две колонки)
         MenuItem(
             text=t(lang, "MAIN_MENU.top_up"), 
             callback="top_up", 
-            order=9
+            order=11
         ),
         MenuItem(
             text=t(lang, "MAIN_MENU.help"), 
             callback="help", 
-            order=10
+            order=12
         ),
-        # 11. Партнёрская программа (одна колонка)
+        # 9. Партнёрская программа (одна колонка)
         MenuItem(
             text=t(lang, "MAIN_MENU.partner"), 
             callback="partner", 
-            order=11,
+            order=13,
             full_width=True
         ),
     ]

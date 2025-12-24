@@ -529,10 +529,16 @@ def onboarding_complete_keyboard_list() -> List[List[dict]]:
     ]
 
 
-def back_to_menu_keyboard_list() -> List[List[dict]]:
-    """Кнопка назад в меню (список)"""
+def back_to_menu_keyboard_list(back_to: str = None) -> List[List[dict]]:
+    """
+    Кнопка назад в меню (список)
+    
+    Args:
+        back_to: Куда вернуться ("main_menu" или None для меню сервиса)
+    """
+    callback = back_to if back_to else cb("menu")
     return [
-        [{"text": t("btn_back"), "callback_data": cb("menu")}],
+        [{"text": t("btn_back"), "callback_data": callback}],
     ]
 
 

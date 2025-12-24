@@ -31,6 +31,21 @@ from .renderer import renderer
 from . import keyboards as kb
 
 
+async def get_back_callback(core_api: CoreAPI, user_id: int) -> str:
+    """
+    Получить правильный callback для кнопки "Назад" в зависимости от контекста навигации.
+    
+    Returns:
+        "main_menu" если пришли из главного меню бота
+        "service:astrology:menu" если пришли из меню сервиса
+    """
+    state_name, state_data = await core_api.get_user_state(user_id)
+    if state_name == "astro_nav_context" and state_data:
+        from_context = state_data.get("from", "service")
+        return "main_menu" if from_context == "main" else kb.cb("menu")
+    return kb.cb("menu")  # По умолчанию возврат в меню сервиса
+
+
 class AstrologyService(BaseService):
     """
     Сервис персональной астрологии.
@@ -175,6 +190,20 @@ class AstrologyService(BaseService):
         user = await self.core.get_user(user_id)
         return user.referrer_id is not None if user else False
     
+    async def get_back_callback(self, user_id: int) -> str:
+        """
+        Получить правильный callback для кнопки "Назад" в зависимости от контекста навигации.
+        
+        Returns:
+            "main_menu" если пришли из главного меню бота
+            None если пришли из меню сервиса (используется cb("menu"))
+        """
+        state_name, state_data = await self.core.get_user_state(user_id)
+        if state_name == "astro_nav_context" and state_data:
+            from_context = state_data.get("from", "service")
+            return "main_menu" if from_context == "main" else None
+        return None  # По умолчанию возврат в меню сервиса
+    
     # === Main Handler ===
     
     async def handle_callback(
@@ -193,6 +222,12 @@ class AstrologyService(BaseService):
             params_list.append(params["1"])
         if params.get("2"):
             params_list.append(params["2"])
+        
+        # Извлекаем параметр from для отслеживания контекста навигации
+        from_context = params.get("from", "service")  # По умолчанию "service"
+        
+        # Сохраняем контекст в state для использования в обработчиках
+        await self.core.set_user_state(user_id, f"astro_nav_context", {"from": from_context})
         
         handlers = {
             "menu": self._handle_menu,
@@ -946,17 +981,18 @@ class AstrologyService(BaseService):
                 await session.commit()
             
             # Отправляем HTML файл если успешно отрендерили, иначе текст
+            back_to = await self.get_back_callback(user_id)
             if html_path:
                 return Response(
                     text=f"🌟 Натальная карта {profile.name} готова!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
             else:
                 return Response(
                     text=interpretation,
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                 )
         
         elif action == "generate_chart":
@@ -1008,17 +1044,18 @@ class AstrologyService(BaseService):
                 session.add(reading)
                 await session.commit()
             
+            back_to = await self.get_back_callback(user_id)
             if html_path:
                 return Response(
                     text=f"🌟 Натальная карта {chart.name} готова!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
             else:
                 return Response(
                     text=f"🌟 Натальная карта для {chart.name}\n\n{interpretation}",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                 )
         
         return Response(text="Неизвестное действие", action="answer")
@@ -1384,15 +1421,16 @@ class AstrologyService(BaseService):
                 session.add(reading)
                 await session.commit()
             
+            back_to = await self.get_back_callback(user_id)
             if html_path:
                 return Response(
                     text=f"👶 Детский гороскоп {chart.name} готов!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
             else:
-                return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+                return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         return Response(text="Неизвестное действие", action="answer")
     
@@ -1480,14 +1518,15 @@ class AstrologyService(BaseService):
                 session.add(reading)
                 await session.commit()
 
+            back_to = await self.get_back_callback(user_id)
             if html_path:
                 return Response(
                     text=f"💕 Любовный портрет {profile.name} готов!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "portrait_chart":
             # Генерация для сохранённой карты
@@ -1529,14 +1568,15 @@ class AstrologyService(BaseService):
                 session.add(reading)
                 await session.commit()
 
+            back_to = await self.get_back_callback(user_id)
             if html_path:
                 return Response(
                     text=f"💕 Любовный портрет {chart.name} готов!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "add":
             # Добавить новую карту
