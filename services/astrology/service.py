@@ -1616,6 +1616,7 @@ class AstrologyService(BaseService):
         if not profile:
             return self._require_profile_response()
         
+        back_to = await self.get_back_callback(user_id)
         action = params[0] if params else "list"
         prices = await self.get_prices_dict()
         
@@ -1711,11 +1712,11 @@ class AstrologyService(BaseService):
             if html_path:
                 return Response(
                     text=f"🔮 Астропрогноз для {person_name} готов!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "add":
             buttons = []
@@ -1744,6 +1745,7 @@ class AstrologyService(BaseService):
         if not profile:
             return self._require_profile_response()
         
+        back_to = await self.get_back_callback(user_id)
         action = params[0] if params else "list"
         prices = await self.get_prices_dict()
         
@@ -1838,11 +1840,11 @@ class AstrologyService(BaseService):
             if html_path:
                 return Response(
                     text=f"📅 График событий для {person_name} готов!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "add":
             buttons = []
@@ -1871,6 +1873,7 @@ class AstrologyService(BaseService):
         if not profile:
             return self._require_profile_response()
         
+        back_to = await self.get_back_callback(user_id)
         action = params[0] if params else "list"
         
         if action == "list" or action == "":
@@ -1980,11 +1983,11 @@ class AstrologyService(BaseService):
             if html_path:
                 return Response(
                     text=f"✨ Транзиты для {profile.name} готовы!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "generate_chart":
             chart_id = int(params[1]) if len(params) > 1 else 0
@@ -2034,11 +2037,11 @@ class AstrologyService(BaseService):
             if html_path:
                 return Response(
                     text=f"✨ Транзиты для {chart.name} готовы!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
-            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list())
+            return Response(text=interpretation, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         elif action == "add":
             buttons = []
@@ -2067,6 +2070,7 @@ class AstrologyService(BaseService):
         if not profile:
             return self._require_profile_response()
         
+        back_to = await self.get_back_callback(user_id)
         action = params[0] if params else "first"
         charts = await self.get_saved_charts(user_id)
         
@@ -2194,7 +2198,7 @@ class AstrologyService(BaseService):
             if html_path:
                 return Response(
                     text=f"💑 Совместимость {name1} и {name2} готова!",
-                    keyboard=kb.back_to_menu_keyboard_list(),
+                    keyboard=kb.back_to_menu_keyboard_list(back_to),
                     media_path=html_path,
                     media_type="document",
                 )
@@ -2210,6 +2214,8 @@ class AstrologyService(BaseService):
         profile = await self.get_profile(user_id)
         if not profile:
             return self._require_profile_response()
+        
+        back_to = await self.get_back_callback(user_id)
         
         action = params[0] if params else "menu"
         
@@ -2426,7 +2432,7 @@ class AstrologyService(BaseService):
         if html_path:
             return Response(
                 text=f"✨ Ответ астролога готов!",
-                keyboard=kb.back_to_menu_keyboard_list(),
+                keyboard=kb.back_to_menu_keyboard_list(back_to),
                 media_path=html_path,
                 media_type="document",
                 action="send",
