@@ -65,6 +65,7 @@ def main_menu_keyboard(
         [{"text": f"{t('btn_natal_chart')} — {prices.get('natal_chart', 5)} GTON", "callback_data": cb("natal")}],
         [{"text": f"{t('btn_child_chart')} — {prices.get('child_chart', 6)} GTON", "callback_data": cb("child")}],
         [{"text": f"{t('btn_love_horoscope')} — {prices.get('love_portrait', 6)} GTON", "callback_data": cb("love")}],
+        [{"text": f"❓ Задать вопрос Люцине — {prices.get('question', 5)} GTON", "callback_data": cb("question")}],
         
         # Прогнозы
         [{"text": f"{t('btn_daily_horoscope')} — {prices.get('daily_horoscope', 0.5)} GTON", "callback_data": cb("daily")}],
@@ -459,12 +460,12 @@ def main_menu_keyboard_list(prices: dict, has_profile: bool = True) -> List[List
         [{"text": f"{t('btn_natal_chart')} — {prices.get('natal_chart', 5)} GTON", "callback_data": cb("natal")}],
         [{"text": f"{t('btn_child_chart')} — {prices.get('child_chart', 6)} GTON", "callback_data": cb("child")}],
         [{"text": f"{t('btn_love_horoscope')} — {prices.get('love_portrait', 6)} GTON", "callback_data": cb("love")}],
+        [{"text": f"❓ Задать вопрос Люцине — {prices.get('question', 5)} GTON", "callback_data": cb("question")}],
         [{"text": f"{t('btn_daily_horoscope')} — {prices.get('daily_horoscope', 0.5)} GTON", "callback_data": cb("daily")}],
         [{"text": f"{t('btn_forecast')} — от {prices.get('forecast_week', 4)} GTON", "callback_data": cb("forecast")}],
         [{"text": f"{t('btn_events')} — от {prices.get('events_3days', 2)} GTON", "callback_data": cb("events")}],
         [{"text": f"{t('btn_transits')} — {prices.get('transits', 3)} GTON", "callback_data": cb("transits")}],
         [{"text": f"{t('btn_compatibility')} — {prices.get('compatibility', 8)} GTON", "callback_data": cb("compat")}],
-        [{"text": f"❓ Задать вопрос — {prices.get('question', 5)} GTON", "callback_data": cb("question")}],
         [{"text": t("btn_back"), "callback_data": "main_menu"}],
     ]
 
