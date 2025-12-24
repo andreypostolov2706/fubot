@@ -128,20 +128,27 @@ async def send_daily_horoscopes(bot, core_api):
                     if not is_trial:
                         await core_api.deduct_balance(profile.user_id, price, "Ежедневный гороскоп")
                     
+                    # Создаём кнопку меню
+                    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                    keyboard = [[InlineKeyboardButton("📋 Главное меню", callback_data="service:astrology:menu")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    
                     # Отправляем HTML документ
                     if html_path:
                         await bot.send_document(
                             chat_id=user.telegram_id,
                             document=open(html_path, 'rb'),
                             caption=f"☀️ <b>Ваш гороскоп на {today_str}</b>",
-                            parse_mode="HTML"
+                            parse_mode="HTML",
+                            reply_markup=reply_markup
                         )
                     else:
                         # Fallback на текст если HTML не создался
                         await bot.send_message(
                             chat_id=user.telegram_id,
                             text=f"☀️ <b>Ваш гороскоп на {today_str}</b>\n\n{interpretation}",
-                            parse_mode="HTML"
+                            parse_mode="HTML",
+                            reply_markup=reply_markup
                         )
                     
                     # Уменьшаем счетчик триала
