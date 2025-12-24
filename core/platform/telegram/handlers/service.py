@@ -33,13 +33,23 @@ async def service_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     params = {}
     
     # Парсим все дополнительные параметры
-    if len(parts) > 3:
-        params["id"] = parts[3]
-        params["0"] = parts[3]
-    if len(parts) > 4:
-        params["1"] = parts[4]
-    if len(parts) > 5:
-        params["2"] = parts[5]
+    param_index = 0
+    for i in range(3, len(parts)):
+        part = parts[i]
+        # Проверяем, является ли это параметром вида key=value
+        if "=" in part:
+            key, value = part.split("=", 1)
+            params[key] = value
+        else:
+            # Обычный параметр по индексу
+            if param_index == 0:
+                params["id"] = part
+                params["0"] = part
+            elif param_index == 1:
+                params["1"] = part
+            elif param_index == 2:
+                params["2"] = part
+            param_index += 1
     
     # Get service
     service = service_registry.get(service_id)

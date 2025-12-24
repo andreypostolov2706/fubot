@@ -2436,7 +2436,8 @@ class AstrologyService(BaseService):
                 buttons.append([{"text": f"👤 {c.name} {sign_emoji} — {relation}", "callback_data": kb.cb("charts", "view", c.id)}])
             if used < max_slots:
                 buttons.append([{"text": t("charts_add"), "callback_data": kb.cb("charts", "add")}])
-            buttons.append([{"text": t("btn_back"), "callback_data": kb.cb("menu")}])
+            back_to = await self.get_back_callback(user_id)
+            buttons.append([{"text": t("btn_back"), "callback_data": back_to if back_to else kb.cb("menu")}])
             
             return Response(text=text, keyboard=buttons)
         
@@ -2541,7 +2542,8 @@ class AstrologyService(BaseService):
         
         if not readings:
             text = f"{t('history_title')}\n\n{t('history_empty')}"
-            return Response(text=text, keyboard=kb.back_to_menu_keyboard_list())
+            back_to = await self.get_back_callback(user_id)
+            return Response(text=text, keyboard=kb.back_to_menu_keyboard_list(back_to))
         
         # Считаем записи с файлами
         readings_with_files = [r for r in readings if r.file_path]
@@ -2564,7 +2566,8 @@ class AstrologyService(BaseService):
                     "callback_data": kb.cb("history", "open", str(r.id))
                 }])
         
-        buttons.append([{"text": t("btn_back"), "callback_data": kb.cb("menu")}])
+        back_to = await self.get_back_callback(user_id)
+        buttons.append([{"text": t("btn_back"), "callback_data": back_to if back_to else kb.cb("menu")}])
         
         return Response(text=text, keyboard=buttons)
     
@@ -2646,7 +2649,8 @@ class AstrologyService(BaseService):
                 buttons.append([{"text": "✅ Включить ежедневный гороскоп", "callback_data": kb.cb("settings", "daily_on")}])
             
             buttons.append([{"text": "🗑 Удалить профиль", "callback_data": kb.cb("settings", "delete")}])
-            buttons.append([{"text": t("btn_back"), "callback_data": kb.cb("menu")}])
+            back_to = await self.get_back_callback(user_id)
+            buttons.append([{"text": t("btn_back"), "callback_data": back_to if back_to else kb.cb("menu")}])
             
             return Response(text=text, keyboard=buttons)
         

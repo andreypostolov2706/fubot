@@ -90,24 +90,24 @@ async def main_menu_kb(user_id: int, lang: str = "ru"):
         ),
         # 6. Все услуги | История (две колонки)
         MenuItem(
-            text="📋 Все услуги",
+            text="📋 ВСЕ УСЛУГИ",
             callback="service:astrology:menu",
             order=7
         ),
         MenuItem(
             text="📜 История",
-            callback="service:astrology:history",
+            callback="service:astrology:history:from=main",
             order=8
         ),
         # 7. Мои карты | Настройки (две колонки)
         MenuItem(
             text="🗂 Мои карты",
-            callback="service:astrology:charts",
+            callback="service:astrology:charts:from=main",
             order=9
         ),
         MenuItem(
             text="⚙️ Настройки",
-            callback="service:astrology:settings",
+            callback="service:astrology:settings:from=main",
             order=10
         ),
         # 8. Пополнить | Помощь (две колонки)
