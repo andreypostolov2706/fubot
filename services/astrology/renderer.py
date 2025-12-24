@@ -305,6 +305,9 @@ class AstrologyRenderer:
         user_id: int,
         icon: str = "✨",
         subtitle: str = "",
+        user_name: str = "",
+        user_sign: str = "",
+        user_sign_emoji: str = "",
     ) -> Optional[str]:
         """Рендерит произвольный результат в HTML файл используя шаблон generic.html."""
         try:
@@ -320,6 +323,9 @@ class AstrologyRenderer:
                 icon=icon,
                 subtitle=subtitle,
                 content=html_content,
+                user_name=user_name,
+                user_sign=user_sign,
+                user_sign_emoji=user_sign_emoji,
             )
 
             filename = sanitize_filename(title)

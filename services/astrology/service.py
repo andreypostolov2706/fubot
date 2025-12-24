@@ -1503,7 +1503,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="💕",
-                subtitle=f"{profile.name}",
+                subtitle=datetime.now().strftime("%d.%m.%Y"),
+                user_name=profile.name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:
@@ -1554,7 +1557,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="💕",
-                subtitle=f"{chart.name}",
+                subtitle=datetime.now().strftime("%d.%m.%Y"),
+                user_name=chart.name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:
@@ -1680,7 +1686,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="🔮",
-                subtitle=f"{person_name} — {period_data['name']}",
+                subtitle=f"{period_data['name']}",
+                user_name=person_name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:
@@ -1804,7 +1813,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="📅",
-                subtitle=f"{person_name} — {period_data['name']}",
+                subtitle=f"{period_data['name']}",
+                user_name=person_name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:
@@ -1945,7 +1957,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="🌟",
-                subtitle=f"{profile.name}",
+                subtitle=today,
+                user_name=profile.name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:
@@ -1995,7 +2010,10 @@ class AstrologyService(BaseService):
                 content=interpretation,
                 user_id=user_id,
                 icon="🌟",
-                subtitle=f"{chart.name}",
+                subtitle=today,
+                user_name=chart.name,
+                user_sign=get_sign_name(chart_data.sun_sign),
+                user_sign_emoji=get_sign_emoji(chart_data.sun_sign),
             )
             
             async with get_db() as session:

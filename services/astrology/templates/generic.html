@@ -13,6 +13,26 @@
     <div class="subtitle">{{ subtitle }}</div>
 </div>
 
+{% if user_name or user_sign %}
+<div class="user-info">
+    {% if user_name %}
+    <div class="sign">
+        <span class="sign-icon">👤</span>
+        <span class="sign-name">{{ user_name }}</span>
+    </div>
+    {% endif %}
+    {% if user_name and user_sign %}
+    <div class="divider"></div>
+    {% endif %}
+    {% if user_sign %}
+    <div class="sign">
+        <span class="sign-icon">{{ user_sign_emoji }}</span>
+        <span class="sign-name">{{ user_sign }}</span>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="content">
     {{ content | safe }}
 </div>
